@@ -1,0 +1,24 @@
+# hack to expose registry via nodeport
+# localhost:30003 can be used to connect from within the cluster (node)
+# or minikube vm's ip:port to connect from host machine, i.e. 192.168.49.2:30003
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-nodeport
+  namespace: kube-system
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 5000
+    nodePort: 30003
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+    nodePort: 30004
+  selector:
+    actual-registry: "true"
+    kubernetes.io/minikube-addons: registry

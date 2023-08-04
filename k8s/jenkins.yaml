@@ -42,11 +42,13 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 8080
+    nodePort: 30001
   - name: agent
     protocol: TCP
     port: 50000
     targetPort: 50000
-# RBAC
+    nodePort: 30002
+# RBAC to allow master create agent pods
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -88,4 +90,45 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: jenkins
+  namespace: jenkins
+# RBAC to allow jenkins agent perform manifests deployments
+# TODO: tighten permissions, it's level of a cluster-admin
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-agent
+  namespace: jenkins
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-agent
+  labels:
+    app: jenkins-agent
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-agent
+  labels:
+    app: jenkins-agent
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: jenkins-agent
+subjects:
+- kind: ServiceAccount
+  name: jenkins-agent
   namespace: jenkins

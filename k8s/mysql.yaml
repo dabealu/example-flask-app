@@ -1,1 +1,57 @@
-# TODO
+    # command: '--default-authentication-plugin=mysql_native_password'
+    # healthcheck:
+    #   test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/db-password)" --silent']
+    #   interval: 3s
+    #   retries: 5
+    #   start_period: 30s
+    # # volumes:
+    # # - db-data:/var/lib/mysql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: userapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mariadb:10
+        args:
+        - '--default-authentication-plugin=mysql_native_password'
+        env:
+        - name: MARIADB_USER
+          value: app
+        - name: MARIADB_PASSWORD
+          value: app
+        - name: MARIADB_ROOT_PASSWORD
+          value: root
+        - name: MARIADB_DATABASE
+          value: app
+        ports:
+        - name: sql
+          containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: userapi
+spec:
+  selector:
+    app: mysql
+  type: LoadBalancer
+  ports:
+  - name: sql
+    protocol: TCP
+    port: 3306
+    targetPort: 3306
+    nodePort: 30006
