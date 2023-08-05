@@ -13,7 +13,7 @@ podTemplate(yaml: '''
                   - name: dockersock
                     mountPath: /var/run/docker.sock
                 - name: kubectl
-                  image: portainer/kubectl-shell #bitnami/kubectl:latest
+                  image: portainer/kubectl-shell
                   command:
                   - cat
                   tty: true
@@ -45,7 +45,7 @@ podTemplate(yaml: '''
     stage('run tests') {
       container('docker') {
         script {
-          sh "echo TODO:tests"
+          runTests()
         }
       }
     }
@@ -63,6 +63,17 @@ podTemplate(yaml: '''
       }
     }
 
+    post {
+      always {
+        container('docker') {
+          script {
+            // cleanup containers and volumes after tests
+            sh "docker compose down --volumes"
+          }
+        }
+      }
+    }
+
   }
 }
 
@@ -75,6 +86,12 @@ def buildImage(def tag) {
   sh "docker tag localhost:30003/userapi:${tag} localhost:30003/userapi:latest"
   sh "docker push localhost:30003/userapi:${tag}"
   sh "docker push localhost:30003/userapi:latest"
+}
+
+def runTests() {
+  sh "docker compose up -d"
+  sh "sleep 15" // wait for db to initialize; TODO: proper readiness check
+  sh "docker compose exec app python3 userapi_test.py"
 }
 
 def deployManifests(def tag) {

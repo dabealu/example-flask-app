@@ -86,8 +86,6 @@ data:
   nginx.conf: |
     server {
       listen 80;
-      # server_name localhost;
-
       location / {
         proxy_pass http://localhost:5000;
         proxy_set_header Host $host;

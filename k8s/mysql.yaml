@@ -1,11 +1,3 @@
-    # command: '--default-authentication-plugin=mysql_native_password'
-    # healthcheck:
-    #   test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 --password="$$(cat /run/secrets/db-password)" --silent']
-    #   interval: 3s
-    #   retries: 5
-    #   start_period: 30s
-    # # volumes:
-    # # - db-data:/var/lib/mysql
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,6 +28,7 @@ spec:
           value: root
         - name: MARIADB_DATABASE
           value: app
+        # TODO: add readiness/liveness probes
         ports:
         - name: sql
           containerPort: 3306

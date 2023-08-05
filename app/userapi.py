@@ -22,6 +22,28 @@ def index():
     return "Hi :D "
 
 
+@app.route("/create_table")
+def create_table():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        create_table_query = """
+            CREATE TABLE users (
+                user_id INT AUTO_INCREMENT PRIMARY KEY,
+                user_name VARCHAR(255) NOT NULL,
+                user_email VARCHAR(255) NOT NULL,
+                user_password VARCHAR(255) NOT NULL
+            )
+        """
+        cursor.execute(create_table_query)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return "Table 'users' created successfully!"
+    except Exception as e:
+        return str(e)
+
+
 @app.route("/create", methods=["POST"])
 def add_user():
     """Function to create a user to the MySQL database"""
