@@ -47,14 +47,6 @@ deploy mysql pod:
 kubectl apply -f k8s/mysql.yaml
 ```
 
-# registry
-push and pull works with localhost:nodeport on jenkins agent.
-both kubelet and jenkins agent are accessing host's docker socket.
-```sh
-docker tag app:latest localhost:30003/app:latest
-docker push localhost:30003/app:latest
-```
-
 ## jenkins
 ```sh
 # deploy
@@ -63,7 +55,6 @@ kubectl apply -f k8s/jenkins.yaml
 # get password for `admin` user
 kubectl exec -ti -n jenkins $(kubectl get po -n jenkins --no-headers | awk '{print $1}') -- cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-
 - in jenkins web ui select "install suggested plugins"
 - also install plugins `Kubernetes` and `docker-build-step` plugins (go to Manage Jenkins -> Plugins -> Available)
 - configure clouds http://MINIKUBE_VM_IP:30001/configureClouds/ - add `Kubernetes`,

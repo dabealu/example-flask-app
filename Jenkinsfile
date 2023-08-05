@@ -63,17 +63,6 @@ podTemplate(yaml: '''
       }
     }
 
-    post {
-      always {
-        container('docker') {
-          script {
-            // cleanup containers and volumes after tests
-            sh "docker compose down --volumes"
-          }
-        }
-      }
-    }
-
   }
 }
 
@@ -89,9 +78,16 @@ def buildImage(def tag) {
 }
 
 def runTests() {
-  sh "docker compose up -d"
-  sh "sleep 15" // wait for db to initialize; TODO: proper readiness check
-  sh "docker compose exec app python3 userapi_test.py"
+  // TODO: replace sleep with proper readiness check
+  sh '''
+    CLEANUP='docker compose down --volumes'
+    docker compose up -d || $CLEANUP
+    sleep 15
+    docker compose exec app python3 userapi_test.py
+    EX=$?
+    $CLEANUP
+    exit $EX
+  '''
 }
 
 def deployManifests(def tag) {
