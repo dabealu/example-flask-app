@@ -57,7 +57,6 @@ podTemplate(yaml: '''
       // }
       container('kubectl') {
         script {
-          sh "kubectl version"
           deployManifests(env.imageTag)
         }
       }

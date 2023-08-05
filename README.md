@@ -22,25 +22,6 @@ sudo cp ~/.minikube/cache/linux/amd64/v1.27.3/kubectl /usr/local/bin
 minikube addons enable registry
 ```
 
-## accessing endpoints
-all services configured with static node ports which exposed by minikube vm.
-endpoints can be accessed via MINIKUBE_VM_IP:PORT, minikube tunnel must be established (see below).
-
-start minikube tunnel, and grab VM IP:
-```sh
-MINIKUBE_VM_IP=$( minikube ip )
-echo $MINIKUBE_VM_IP
-# run in a separate terminal or in background
-minikube tunnel
-```
-
-ports:
-```yaml
-userapi: 30005
-jenkins: 30001
-registry: 30003
-```
-
 ## mysql
 deploy mysql pod:
 ```sh
@@ -77,7 +58,26 @@ kubectl exec -ti -n jenkins $(kubectl get po -n jenkins --no-headers | awk '{pri
 ```
   this will run "migrations" and create users table in DB
 
-# api
+## accessing endpoints
+all services configured with static node ports which exposed by minikube vm.
+endpoints can be accessed via MINIKUBE_VM_IP:PORT, minikube tunnel must be established (see below).
+
+start minikube tunnel, and grab VM IP:
+```sh
+MINIKUBE_VM_IP=$( minikube ip )
+echo $MINIKUBE_VM_IP
+# run in a separate terminal or in background
+minikube tunnel
+```
+
+ports:
+```yaml
+userapi: 30005
+jenkins: 30001
+registry: 30003
+```
+
+# API
 ```sh
 # create db table:
 curl -H 'Content-Type: application/json' -X GET $MINIKUBE_VM_IP:30005/create_table
@@ -96,6 +96,7 @@ curl -H 'Content-Type: application/json' -X GET $MINIKUBE_VM_IP:30005/delete/1
 
 # CICD
 > tools/vendors selection
+
 it depends on a multiple factors, it's probably a good idea to draw a matrix with requirements and various tools/products, then select those which are having a best fit. then do some tests and see how is it working (or not) for a specific case.
 
 for demo purposes i've selected jenkins because i tried to keep this environment self-contained and run all required components inside k8s cluster.
@@ -122,6 +123,7 @@ only prioritizing and evaluating all of the factors (which are important for par
 for example if cicd system required to be set up today and shouldn't require any efforts to maintain it's probably going to be some commercial managed solution like actions, travis, circle, etc.
 
 > continuous delivery plan
+
 before having CD, first i'll think about having a proper underlying platform:
 - managed fault-tolerant kubernetes cluster, and infra components like loadbalancers-ingress controllers, container registry (for example ECR), etc
 - reliable database - managed solution like AWS RDS, or self hosted DB with configured replication, automatic failovers and backups
@@ -134,7 +136,7 @@ then configure pipeline, which includes following basic steps:
 - depends on the requirements auto deployments may be configured for staging and prod environments
 - optionally there are might be disposable feature-branch allowing developers to test their PRs
 
-# potential improvements and notes
+# improvements and notes
 there is a HUGE room for improvement, but time limit allocated for this task was quite tight.
 
 i've tried to make this environment self-contained - there's no dependencies like cloud, database, external CI/CD system, or container registry,
