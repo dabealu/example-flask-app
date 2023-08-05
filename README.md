@@ -42,30 +42,31 @@ kubectl exec -ti -n jenkins $(kubectl get po -n jenkins --no-headers | awk '{pri
   open cloud details, leave all fields default, press `Test Connection` - it should return `Connected to Kubernetes v1.27.3`
 - set jenkins URL to http://jenkins/:
   Manage Jenkins -> System -> Jenkins URL, http://MINIKUBE_VM_IP:30001/manage/configure
-  it's is used by k8s agents to connect back to Jenkins main
+  URL used by k8s agents to connect back to Jenkins main
 - create job:
-  - from home dashboard click `New item`
-  - select `Pipeline` and enter job name, like `userapi-pipeline`
-  - check `Poll SCM` and enter schedule `*/2 * * * *`
-  - in pipeline definition select `Pipeline script from SCM`, and enter following fields:
+  - on home page click `New item`
+  - select `Pipeline`, and enter job name, like `userapi-pipeline`
+  - check `Poll SCM`, and enter schedule `*/2 * * * *`
+  - in pipeline definition select `Pipeline script from SCM`, and enter following parameters:
     - SCM: `Git`
     - Repository URL: https://github.com/dabealu/example-flask-app
     - Branch Specifier: `*/main`
-    - rest fields can be left at their default values, save job
-- after app is deployed run, run following before running other api requests:
+    - leave other fields at their default values, and save job
+- after app is deployed, run following before doing other api requests (see `accessing endpoints`):
 ```sh
   curl -H 'Content-Type: application/json' -X GET $MINIKUBE_VM_IP:30005/create_table
 ```
-  this will run "migrations" and create users table in DB
+  this will run "migrations" and create `users` table in DB
 
 ## accessing endpoints
 all services configured with static node ports which exposed by minikube vm.
-endpoints can be accessed via MINIKUBE_VM_IP:PORT, minikube tunnel must be established (see below).
+endpoints can be accessed by MINIKUBE_VM_IP:PORT, minikube tunnel must be established.
 
 start minikube tunnel, and grab VM IP:
 ```sh
 MINIKUBE_VM_IP=$( minikube ip )
 echo $MINIKUBE_VM_IP
+
 # run in a separate terminal or in background
 minikube tunnel
 ```
