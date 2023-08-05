@@ -90,6 +90,6 @@ def runTests() {
 }
 
 def deployManifests(def tag) {
-  sh "sed -i 's/NEW_USERAPI_TAG/${tag}/' k8s/kustomization.yaml"
+  sh "sed -i 's/NEW_USERAPI_TAG/\"${tag}\"/' k8s/kustomization.yaml"
   sh "kubectl kustomize k8s | kubectl apply -f -"
 }
